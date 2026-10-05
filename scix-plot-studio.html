@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCIX Plot Studio — Product Specification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;0,8..60,700;1,8..60,400&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #eef2f0;
+    --paper-line: rgba(23,58,54,0.09);
+    --ink: #17322c;
+    --ink-soft: #3f5c54;
+    --ink-faint: #6f8a82;
+    --rule: #c3d1cb;
+    --accent: #1f6f5c;
+    --accent-soft: #dcebe4;
+    --accent-2: #a8572c;
+    --card: #f7faf8;
+    --serif: "Source Serif 4", Georgia, serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0/100% 32px,
+      linear-gradient(90deg, var(--paper-line) 1px, transparent 1px) 0 0/32px 100%,
+      var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:17px;
+    line-height:1.65;
+  }
+
+  a{color:var(--accent);}
+
+  ::selection{background:var(--accent-soft);}
+
+  /* ---------- layout shell ---------- */
+  .shell{
+    display:grid;
+    grid-template-columns: 300px minmax(0,1fr);
+    max-width:1320px;
+    margin:0 auto;
+  }
+
+  nav.toc{
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+    padding:48px 28px 48px 32px;
+    border-right:1px solid var(--rule);
+  }
+  nav.toc::-webkit-scrollbar{width:6px;}
+  nav.toc::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}
+
+  .toc-brand{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.04em;
+    color:var(--ink-faint);
+    margin-bottom:4px;
+  }
+  .toc-title{
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 28px;
+  }
+  .toc-list{list-style:none;margin:0;padding:0;}
+  .toc-list li{margin-bottom:2px;}
+  .toc-list a{
+    display:block;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-decoration:none;
+    padding:6px 10px 6px 12px;
+    border-left:2px solid transparent;
+    border-radius:2px;
+  }
+  .toc-list a:hover{color:var(--ink);border-left-color:var(--rule);background:rgba(31,111,92,0.05);}
+  .toc-list a.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-soft);font-weight:600;}
+  .toc-list .num{color:var(--ink-faint);margin-right:8px;}
+  .toc-list a.active .num{color:var(--accent);}
+
+  .toc-foot{
+    margin-top:32px;
+    padding-top:20px;
+    border-top:1px solid var(--rule);
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-faint);
+    line-height:1.8;
+  }
+
+  main{padding:0 0 120px;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    padding:88px 64px 56px;
+    border-bottom:1px solid var(--rule);
+  }
+  .hero-eyebrow{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--accent);
+    margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:56px;
+    line-height:1.02;
+    font-weight:700;
+    margin:0 0 18px;
+    max-width:14ch;
+  }
+  .hero .dek{
+    font-size:19px;
+    color:var(--ink-soft);
+    max-width:56ch;
+    margin:0 0 40px;
+  }
+  .pipeline{
+    display:flex;
+    flex-wrap:wrap;
+    gap:0;
+    font-family:var(--mono);
+    font-size:13px;
+    align-items:center;
+  }
+  .pipeline .step{
+    padding:9px 16px;
+    border:1px solid var(--ink);
+    border-radius:3px;
+    background:var(--card);
+  }
+  .pipeline .arrow{
+    padding:0 10px;
+    color:var(--ink-faint);
+  }
+  .hero-note{
+    margin-top:28px;
+    font-size:14.5px;
+    color:var(--ink-soft);
+    border-left:2px solid var(--accent-2);
+    padding-left:16px;
+    max-width:56ch;
+  }
+  .hero-note strong{color:var(--ink);}
+
+  /* ---------- sections ---------- */
+  section{
+    padding:56px 64px;
+    border-bottom:1px solid var(--rule);
+    scroll-margin-top:24px;
+  }
+  section:last-of-type{border-bottom:none;}
+
+  .sec-head{
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    margin-bottom:8px;
+  }
+  .sec-num{
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--accent);
+  }
+  h2{
+    font-size:28px;
+    font-weight:600;
+    margin:0;
+  }
+  .sec-sub{
+    color:var(--ink-soft);
+    font-size:16px;
+    margin:6px 0 28px;
+    max-width:62ch;
+  }
+
+  p{max-width:66ch;}
+  p.wide{max-width:none;}
+
+  h3{
+    font-size:17px;
+    font-weight:600;
+    margin:32px 0 10px;
+  }
+  h3.mono{font-family:var(--mono);font-size:13px;letter-spacing:.02em;color:var(--ink-soft);text-transform:none;}
+
+  ul.plain{margin:0 0 0 0;padding-left:0;list-style:none;}
+  ul.plain li{padding:3px 0 3px 16px;border-left:1px solid var(--rule);font-size:15px;color:var(--ink-soft);}
+
+  /* two-column content grid */
+  .grid2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:36px;
+    margin-top:8px;
+  }
+  .grid3{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin-top:8px;
+  }
+
+  /* wireframe / diagram panel — genuine interface mockups & schema, so monospace is functional not decorative */
+  .panel{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    padding:18px 20px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    line-height:1.7;
+    color:var(--ink);
+    overflow-x:auto;
+    white-space:pre;
+  }
+  .panel-label{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-faint);
+    margin:0 0 8px;
+  }
+
+  /* menu column card for navigation section */
+  .menu-card{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    padding:18px 20px 20px;
+  }
+  .menu-card h4{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--accent);
+    margin:0 0 12px;
+    padding-bottom:8px;
+    border-bottom:1px solid var(--rule);
+  }
+  .menu-card ul{list-style:none;margin:0;padding:0;}
+  .menu-card li{
+    font-size:14px;
+    padding:4px 0;
+    color:var(--ink-soft);
+  }
+
+  /* discipline cards */
+  .disc-card{
+    background:var(--card);
+    border:1px solid var(--rule);
+    border-radius:4px;
+    padding:16px 18px;
+  }
+  .disc-card h4{
+    font-size:15px;
+    margin:0 0 8px;
+  }
+  .disc-card ul{margin:0;padding-left:18px;color:var(--ink-soft);font-size:13.5px;}
+  .disc-card li{margin-bottom:3px;}
+
+  /* stat check list */
+  .check-list{list-style:none;margin:0;padding:0;font-family:var(--mono);font-size:13.5px;}
+  .check-list li{padding:5px 0;color:var(--ink-soft);}
+  .check-list li::before{content:"✓  ";color:var(--accent);}
+  .check-list li.warn::before{content:"⚠  ";color:var(--accent-2);}
+  .check-list li.warn{color:var(--ink);}
+
+  /* architecture stack */
+  .stack{display:flex;flex-direction:column;gap:0;}
+  .stack-row{
+    border:1px solid var(--rule);
+    background:var(--card);
+    padding:14px 20px;
+    font-family:var(--mono);
+    font-size:13px;
+    text-align:center;
+  }
+  .stack-row + .stack-row{border-top:none;}
+  .stack-row.head{background:var(--ink);color:var(--paper);font-weight:600;}
+  .stack-row .sub{
+    display:flex;
+    justify-content:center;
+    gap:24px;
+    margin-top:6px;
+    color:var(--ink-soft);
+    flex-wrap:wrap;
+  }
+  .stack-arrow{
+    text-align:center;
+    color:var(--ink-faint);
+    font-family:var(--mono);
+    font-size:13px;
+    padding:2px 0;
+  }
+
+  /* releases timeline */
+  .releases{border-left:2px solid var(--rule);margin-left:6px;}
+  .release{position:relative;padding:0 0 32px 28px;}
+  .release:last-child{padding-bottom:0;}
+  .release::before{
+    content:"";
+    position:absolute;
+    left:-7px;
+    top:4px;
+    width:12px;height:12px;
+    border-radius:50%;
+    background:var(--paper);
+    border:2px solid var(--accent);
+  }
+  .release .rel-num{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--accent);
+    margin-bottom:4px;
+  }
+  .release h4{margin:0 0 4px;font-size:17px;}
+  .release p{margin:0;color:var(--ink-soft);font-size:14.5px;}
+
+  /* pillars */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .pillar{border:1px solid var(--rule);border-radius:4px;padding:22px 20px;background:var(--card);}
+  .pillar .mark{font-family:var(--mono);color:var(--accent);font-size:13px;margin-bottom:10px;}
+  .pillar h4{margin:0 0 8px;font-size:16px;}
+  .pillar p{margin:0;font-size:13.5px;color:var(--ink-soft);}
+
+  footer{
+    padding:48px 64px 80px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--ink-faint);
+  }
+
+  @media (max-width: 980px){
+    .shell{grid-template-columns:1fr;}
+    nav.toc{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--rule);}
+    .grid2, .grid3, .pillars{grid-template-columns:1fr;}
+    .hero{padding:56px 24px 40px;}
+    section{padding:40px 24px;}
+    .hero h1{font-size:38px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <nav class="toc" id="toc">
+    <div class="toc-brand">SCIX PLOT STUDIO</div>
+    <div class="toc-title">Product Spec</div>
+    <ul class="toc-list">
+      <li><a href="#s1"><span class="num">01</span>Main interface</a></li>
+      <li><a href="#s2"><span class="num">02</span>Navigation map</a></li>
+      <li><a href="#s3"><span class="num">03</span>Data workspace</a></li>
+      <li><a href="#s4"><span class="num">04</span>Graph creation wizard</a></li>
+      <li><a href="#s5"><span class="num">05</span>Graph editor</a></li>
+      <li><a href="#s6"><span class="num">06</span>Advanced plotting</a></li>
+      <li><a href="#s7"><span class="num">07</span>Statistics wizard</a></li>
+      <li><a href="#s8"><span class="num">08</span>Significance annotation</a></li>
+      <li><a href="#s9"><span class="num">09</span>Publication figure designer</a></li>
+      <li><a href="#s10"><span class="num">10</span>Journal figure presets</a></li>
+      <li><a href="#s11"><span class="num">11</span>Graph templates</a></li>
+      <li><a href="#s12"><span class="num">12</span>Research figure audit</a></li>
+      <li><a href="#s13"><span class="num">13</span>Reproducibility panel</a></li>
+      <li><a href="#s14"><span class="num">14</span>Universal discipline engine</a></li>
+      <li><a href="#s15"><span class="num">15</span>Technical architecture</a></li>
+      <li><a href="#s16"><span class="num">16</span>Database structure</a></li>
+      <li><a href="#s17"><span class="num">17</span>Differentiators</a></li>
+      <li><a href="#s18"><span class="num">18</span>Product architecture</a></li>
+    </ul>
+    <div class="toc-foot">
+      NM GROUP OF INDUSTRIES<br>
+      &amp; RESEARCH FOUNDATION<br>
+      Internal draft — v0.1
+    </div>
+  </nav>
+
+  <main>
+
+    <div class="hero">
+      <div class="hero-eyebrow">SCIX / PLOT STUDIO MODULE</div>
+      <h1>Scientific graphing, statistics &amp; publication figures, in one workspace</h1>
+      <p class="dek">A major SCIX module combining Origin-style scientific plotting, Prism-style statistical workflow, and a discipline-independent research environment — built around a single working principle.</p>
+      <div class="pipeline">
+        <span class="step">Import</span><span class="arrow">→</span>
+        <span class="step">Organize</span><span class="arrow">→</span>
+        <span class="step">Analyze</span><span class="arrow">→</span>
+        <span class="step">Plot</span><span class="arrow">→</span>
+        <span class="step">Customize</span><span class="arrow">→</span>
+        <span class="step">Validate</span><span class="arrow">→</span>
+        <span class="step">Export</span>
+      </div>
+      <div class="hero-note"><strong>Core rule:</strong> the researcher supplies the data and chooses the analysis. SCIX never invents experimental data, statistical results, or scientific conclusions.</div>
+    </div>
+
+    <!-- 1 -->
+    <section id="s1">
+      <div class="sec-head"><span class="sec-num">01</span><h2>Main interface</h2></div>
+      <p class="sec-sub">A three-pane layout familiar to researchers already using scientific plotting software, with a modern shell around it.</p>
+      <div class="panel">┌──────────────────────────────────────────────────────────────────────────────┐
+│ SCIX   | Research Project: Nanomaterial Study              Save   Export     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ File  Data  Analysis  Plot  Statistics  Format  Journal  Validate  Help      │
+├──────────────┬───────────────────────────────────────────────┬───────────────┤
+│              │                                               │               │
+│  PROJECT     │                GRAPH CANVAS                   │   PROPERTIES  │
+│              │                                               │               │
+│  Data        │        ┌─────────────────────────────┐        │ Chart Type    │
+│  Worksheets  │        │                             │        │ X Axis        │
+│  Analyses    │        │        Publication          │        │ Y Axis        │
+│  Graphs      │        │          Figure             │        │ Error Bars    │
+│  Tables      │        │      ● ● ● ● ●              │        │ Regression    │
+│  Templates   │        │    ● ● ● ● ●                │        │ Legend        │
+│              │        │                             │        │ Fonts         │
+│              │        │                             │        │ Symbols       │
+│              │        └─────────────────────────────┘        │ Dimensions    │
+│              │                                               │               │
+├──────────────┴───────────────────────────────────────────────┴───────────────┤
+│ Dataset: Experiment_01.xlsx | Rows: 120 | Columns: 8 | Analysis: ANOVA       │
+└──────────────────────────────────────────────────────────────────────────────┘</div>
+    </section>
+
+    <!-- 2 -->
+    <section id="s2">
+      <div class="sec-head"><span class="sec-num">02</span><h2>Navigation map</h2></div>
+      <p class="sec-sub">Five top-level menus carry the whole workflow, from raw data to a submission-ready figure.</p>
+      <div class="grid3">
+        <div class="menu-card">
+          <h4>DATA</h4>
+          <ul>
+            <li>Import Data</li><li>Data Table</li><li>Worksheet</li><li>Data Cleaning</li>
+            <li>Transformations</li><li>Filter · Sort · Group</li><li>Merge</li><li>Normalize</li>
+            <li>Calculate Column</li><li>Missing Values</li>
+          </ul>
+        </div>
+        <div class="menu-card">
+          <h4>ANALYSIS</h4>
+          <ul>
+            <li>Descriptive Statistics</li><li>t-test · ANOVA</li><li>Multiple Comparison</li>
+            <li>Correlation · Regression</li><li>Nonlinear Regression</li><li>Dose-Response</li>
+            <li>Survival Analysis</li><li>ROC Analysis</li><li>Time-Series</li><li>Multivariate</li><li>Custom Analysis</li>
+          </ul>
+        </div>
+        <div class="menu-card">
+          <h4>PLOT</h4>
+          <ul>
+            <li>New Graph · Gallery</li><li>XY · Line · Scatter</li><li>Column · Bar</li>
+            <li>Grouped · Stacked</li><li>Box · Violin · Histogram</li><li>Area · Heatmap · Contour</li>
+            <li>Survival · ROC · Calibration</li><li>Spectra · Kinetic Plot</li>
+          </ul>
+        </div>
+        <div class="menu-card">
+          <h4>FORMAT</h4>
+          <ul>
+            <li>Axes · Labels · Fonts</li><li>Symbols · Lines</li><li>Error Bars · Legends · Grid</li>
+            <li>Colors · Panel Layout</li><li>Annotations · Equations</li><li>Significance</li><li>Figure Size</li>
+          </ul>
+        </div>
+        <div class="menu-card">
+          <h4>EXPORT</h4>
+          <ul>
+            <li>PNG · TIFF · JPEG</li><li>SVG · PDF · EPS</li><li>DOCX · PPTX</li><li>LaTeX</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="s3">
+      <div class="sec-head"><span class="sec-num">03</span><h2>Origin-style data workspace</h2></div>
+      <p class="sec-sub">A spreadsheet environment in the spirit of established scientific worksheet software.</p>
+      <div class="panel">┌───────────────────────────────────────────────────────────────┐
+│ Worksheet 1                                                   │
+├────┬──────────┬──────────┬──────────┬──────────┬─────────────┤
+│ #  │ Time     │ Control  │ Sample A │ Sample B │ Sample C    │
+├────┼──────────┼──────────┼──────────┼──────────┼─────────────┤
+│ 1  │ 0        │ 0.00     │ 0.00     │ 0.00     │ 0.00        │
+│ 2  │ 10       │ 0.12     │ 0.25     │ 0.31     │ 0.28        │
+│ 3  │ 20       │ 0.21     │ 0.44     │ 0.51     │ 0.47        │
+│ 4  │ 30       │ 0.33     │ 0.62     │ 0.69     │ 0.64        │
+│ 5  │ 40       │ 0.42     │ 0.77     │ 0.82     │ 0.79        │
+└────┴──────────┴──────────┴──────────┴──────────┴─────────────┘</div>
+      <h3>Every column supports</h3>
+      <ul class="plain">
+        <li>Column name · Unit · Data type</li>
+        <li>X/Y designation · Replicate designation · Group designation</li>
+        <li>Error column · Formula · Metadata</li>
+      </ul>
+    </section>
+
+    <!-- 4 -->
+    <section id="s4">
+      <div class="sec-head"><span class="sec-num">04</span><h2>Graph creation wizard</h2></div>
+      <p class="sec-sub">Clicking "New Graph" walks the researcher through four steps.</p>
+      <div class="grid2">
+        <div>
+          <div class="panel-label">STEP 1 — SELECT DATA</div>
+          <div class="panel">Dataset:  Experiment_01.xlsx / Worksheet 1
+
+X Variable   [ Time ▼ ]
+Y Variable   [ Sample A ▼ ]
+Error        [ SD ▼ ]
+
+☐ Include replicates
+☐ Normalize data
+☐ Include missing values</div>
+        </div>
+        <div>
+          <div class="panel-label">STEP 2 — SELECT GRAPH</div>
+          <div class="panel">[ XY ]        [ Line ]        [ Scatter ]
+[ Column ]    [ Grouped ]     [ Box Plot ]
+[ Violin ]    [ Histogram ]   [ Heatmap ]
+[ Survival ]  [ ROC ]         [ Dose Response ]
+[ Spectrum ]  [ Kinetics ]    [ Calibration ]</div>
+        </div>
+        <div>
+          <div class="panel-label">STEP 3 — STATISTICAL ANALYSIS</div>
+          <div class="panel">○ None
+○ Descriptive statistics
+○ t-test
+○ One-way / Two-way ANOVA
+○ Tukey
+○ Correlation
+○ Linear / Nonlinear regression
+○ Custom</div>
+        </div>
+        <div>
+          <div class="panel-label">STEP 4 — FORMATTING</div>
+          <div class="panel">Opens the full Graph Editor
+with the chosen data, graph
+type and analysis already
+attached to the figure.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 -->
+    <section id="s5">
+      <div class="sec-head"><span class="sec-num">05</span><h2>Graph editor</h2></div>
+      <p class="sec-sub">The strongest surface in the product — a left toolbar for drawing, a top toolbar for the file lifecycle, and a right panel for every graph property.</p>
+      <div class="grid3">
+        <div>
+          <div class="panel-label">LEFT TOOLBAR</div>
+          <div class="panel">Select · Move
+Zoom · Pan · Crosshair
+Text · Arrow · Line
+Shape
+Significance
+Annotation</div>
+        </div>
+        <div>
+          <div class="panel-label">TOP TOOLBAR</div>
+          <div class="panel">Undo · Redo · Save
+──────────────────
+New Graph · Duplicate
+Template
+──────────────────
+Fit · Zoom · Full Screen
+──────────────────
+Preview · Validate · Export</div>
+        </div>
+        <div>
+          <div class="panel-label">RIGHT PANEL</div>
+          <div class="panel">Graph
+ Width · Height
+ Background · Border
+ Panel layout
+
+X / Y Axis
+ Title · Units · Scale
+ Min / Max
+ Major / Minor interval
+
+Series
+ Symbol · Line · Size
+ Error bar · Transparency
+
+Legend · Annotations
+Statistics</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 -->
+    <section id="s6">
+      <div class="sec-head"><span class="sec-num">06</span><h2>Origin-style advanced plotting</h2></div>
+      <p class="sec-sub">Curve fitting and peak analysis for spectroscopy, chromatography, and materials work.</p>
+      <div class="grid2">
+        <div>
+          <h3 class="mono">CURVE FITTING</h3>
+          <ul class="plain">
+            <li>Linear · Polynomial</li>
+            <li>Exponential · Logarithmic · Power</li>
+            <li>Gaussian · Lorentzian · Sigmoidal</li>
+            <li>Custom equation</li>
+          </ul>
+          <h3 class="mono" style="margin-top:20px;">DISPLAYED WITH EVERY FIT</h3>
+          <ul class="plain">
+            <li>Equation · R² · Adjusted R²</li>
+            <li>Residuals · Confidence interval</li>
+            <li>Parameter estimates · Standard error · p-value</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="mono">PEAK ANALYSIS</h3>
+          <ul class="plain">
+            <li>Peak detection · Peak position</li>
+            <li>Peak height · Peak area</li>
+            <li>FWHM · Baseline</li>
+            <li>Peak fitting</li>
+          </ul>
+          <p style="margin-top:18px;font-size:14.5px;color:var(--ink-soft);">Particularly relevant for spectroscopy, chromatography, and materials-science datasets.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section id="s7">
+      <div class="sec-head"><span class="sec-num">07</span><h2>Prism-style statistics wizard</h2></div>
+      <p class="sec-sub">SCIX explains what a test does; the researcher decides whether it's the right one.</p>
+      <div class="grid2">
+        <div>
+          <div class="panel-label">WHAT TYPE OF DATA DO YOU HAVE?</div>
+          <div class="panel">[ Column ]
+[ Grouped ]
+[ XY ]
+[ Survival ]
+[ Contingency ]</div>
+        </div>
+        <div>
+          <div class="panel-label">SELECT ANALYSIS</div>
+          <div class="panel">Descriptive
+ Mean · Median · SD · SEM · CV · CI
+
+Comparison
+ t-test · Paired t-test
+ ANOVA · Two-way ANOVA
+ Multiple comparisons
+
+Correlation
+ Pearson · Spearman
+
+Regression
+ Linear · Polynomial · Nonlinear
+
+Clinical
+ ROC · Survival · Kaplan-Meier</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 -->
+    <section id="s8">
+      <div class="sec-head"><span class="sec-num">08</span><h2>Significance annotation</h2></div>
+      <p class="sec-sub">Automatic placement of significance markers — derived only from the analysis actually run.</p>
+      <div class="panel">          ***
+       ─────────
+   ●       ●
+
+Control   Treatment
+
+markers:  *   **   ***   ****   ns   p = 0.032   p &lt; 0.001</div>
+    </section>
+
+    <!-- 9 -->
+    <section id="s9">
+      <div class="sec-head"><span class="sec-num">09</span><h2>Publication figure designer</h2></div>
+      <p class="sec-sub">A dedicated mode for assembling submission-ready, multi-panel figures.</p>
+      <div class="grid2">
+        <div>
+          <div class="panel-label">FIGURE SIZE</div>
+          <div class="panel">☐ Single column
+☐ 1.5 column
+☐ Double column
+☐ Custom
+
+Width:  85 mm
+Height: 65 mm
+DPI:    600</div>
+          <div class="panel-label" style="margin-top:14px;">TYPOGRAPHY</div>
+          <div class="panel">Font · Size
+Bold · Italic
+Superscript · Subscript
+Scientific notation</div>
+        </div>
+        <div>
+          <div class="panel-label">MULTI-PANEL LAYOUT</div>
+          <div class="panel">┌──────────────┬──────────────┐
+│     (a)      │      (b)     │
+│              │              │
+├──────────────┼──────────────┤
+│     (c)      │      (d)     │
+│              │              │
+└──────────────┴──────────────┘</div>
+          <p style="margin-top:12px;font-size:14px;color:var(--ink-soft);">Graphs are dragged into panels and aligned automatically.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 -->
+    <section id="s10">
+      <div class="sec-head"><span class="sec-num">10</span><h2>Journal figure presets</h2></div>
+      <p class="sec-sub">Verified formatting profiles per target journal, with the source of each rule always visible.</p>
+      <div class="panel">TARGET JOURNAL
+[ Select Journal ]
+
+Figure requirements
+────────────────────
+Width · Height · Resolution
+File format · Font
+Maximum panels · Color requirements</div>
+      <p style="margin-top:14px;font-size:14.5px;color:var(--ink-soft);">The system shows the source and date of each journal requirement rather than silently assuming outdated rules.</p>
+    </section>
+
+    <!-- 11 -->
+    <section id="s11">
+      <div class="sec-head"><span class="sec-num">11</span><h2>Graph templates</h2></div>
+      <p class="sec-sub">Reusable, discipline-independent starting points that researchers can customize and save.</p>
+      <div class="grid3" style="grid-template-columns:repeat(4,1fr);">
+        <div class="disc-card"><h4>★ Materials Characterization</h4></div>
+        <div class="disc-card"><h4>★ Photocatalytic Study</h4></div>
+        <div class="disc-card"><h4>★ Biological Assay</h4></div>
+        <div class="disc-card"><h4>★ Cell Viability</h4></div>
+        <div class="disc-card"><h4>★ Dose Response</h4></div>
+        <div class="disc-card"><h4>★ Kinetic Study</h4></div>
+        <div class="disc-card"><h4>★ Survey Analysis</h4></div>
+        <div class="disc-card"><h4>★ Engineering Experiment</h4></div>
+        <div class="disc-card"><h4>★ Regression</h4></div>
+        <div class="disc-card"><h4>★ Spectroscopy</h4></div>
+      </div>
+    </section>
+
+    <!-- 12 -->
+    <section id="s12">
+      <div class="sec-head"><span class="sec-num">12</span><h2>Research figure audit</h2></div>
+      <p class="sec-sub">A pre-export checklist unique to SCIX — the first layer of the Research Integrity system.</p>
+      <div class="panel" style="white-space:normal;">
+        <ul class="check-list">
+          <li>Dataset connected</li>
+          <li>X-axis assigned</li>
+          <li>Y-axis assigned</li>
+          <li>Units specified</li>
+          <li>Error bars identified</li>
+          <li>Statistical method recorded</li>
+          <li>Statistical values calculated</li>
+          <li>Figure resolution acceptable</li>
+          <li>Axis labels present</li>
+          <li>Legend present</li>
+          <li>Figure number assigned</li>
+          <li class="warn">Y-axis unit has not been specified</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 13 -->
+    <section id="s13">
+      <div class="sec-head"><span class="sec-num">13</span><h2>Reproducibility panel</h2></div>
+      <p class="sec-sub">Every figure carries its own provenance record, traceable back to the source dataset.</p>
+      <div class="panel">FIGURE 03
+
+Source:      Experiment_01.xlsx
+Data:        Worksheet 2
+Processing:  Normalization → Log transformation
+Analysis:    One-way ANOVA
+Post-hoc:    Tukey
+Plot:        Grouped column
+Error:       SD
+Created:     SCIX Plot Studio
+Version:     v1.4
+
+[ Trace Figure → returns to the underlying dataset and analysis ]</div>
+    </section>
+
+    <!-- 14 -->
+    <section id="s14">
+      <div class="sec-head"><span class="sec-num">14</span><h2>Universal discipline engine</h2></div>
+      <p class="sec-sub">Plot Studio is not restricted to any one field.</p>
+      <div class="grid3">
+        <div class="disc-card">
+          <h4>Chemistry</h4>
+          <ul><li>UV-Vis</li><li>FTIR</li><li>XRD</li><li>Chromatography</li><li>Calibration curves</li><li>Kinetics</li></ul>
+        </div>
+        <div class="disc-card">
+          <h4>Biology / Medicine</h4>
+          <ul><li>Dose-response</li><li>Cell viability</li><li>Survival curves</li><li>ROC</li><li>Box &amp; violin plots</li></ul>
+        </div>
+        <div class="disc-card">
+          <h4>Materials Science</h4>
+          <ul><li>XRD</li><li>SEM/EDS data</li><li>Stress-strain</li><li>TGA/DSC</li><li>Photocatalytic kinetics</li></ul>
+        </div>
+        <div class="disc-card">
+          <h4>Engineering</h4>
+          <ul><li>Stress-strain</li><li>Load-displacement</li><li>Frequency response</li><li>Control-system plots</li><li>Performance curves</li></ul>
+        </div>
+        <div class="disc-card">
+          <h4>Computer Science</h4>
+          <ul><li>Accuracy</li><li>Precision / recall</li><li>ROC</li><li>Confusion matrix</li><li>Training curves</li><li>Benchmarks</li></ul>
+        </div>
+        <div class="disc-card">
+          <h4>Agriculture</h4>
+          <ul><li>Growth curves</li><li>Yield comparison</li><li>Treatment experiments</li><li>Environmental measurements</li></ul>
+        </div>
+        <div class="disc-card">
+          <h4>Social Sciences</h4>
+          <ul><li>Survey distributions</li><li>Likert-scale analysis</li><li>Correlation</li><li>Regression</li><li>Group comparison</li></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 15 -->
+    <section id="s15">
+      <div class="sec-head"><span class="sec-num">15</span><h2>Technical architecture</h2></div>
+      <p class="sec-sub">A layered stack from interface down to export.</p>
+      <div class="stack">
+        <div class="stack-row head">SCIX PLOT STUDIO</div>
+        <div class="stack-arrow">↓</div>
+        <div class="stack-row">FRONTEND LAYER — Next.js / React
+          <div class="sub"><span>Data</span><span>Graph</span><span>UI</span></div>
+        </div>
+        <div class="stack-arrow">↕</div>
+        <div class="stack-row">BACKEND LAYER — FastAPI / Python
+          <div class="sub"><span>Analysis</span><span>Export</span><span>Validation</span></div>
+        </div>
+        <div class="stack-arrow">↓</div>
+        <div class="stack-row">SCIENTIFIC ENGINE
+          <div class="sub"><span>NumPy</span><span>Pandas</span><span>SciPy</span><span>Statsmodels</span><span>SymPy</span></div>
+        </div>
+        <div class="stack-arrow">↓</div>
+        <div class="stack-row">VISUALIZATION
+          <div class="sub"><span>Matplotlib</span><span>Plotly</span></div>
+        </div>
+        <div class="stack-arrow">↓</div>
+        <div class="stack-row">EXPORT ENGINE
+          <div class="sub"><span>TIFF</span><span>PNG</span><span>SVG</span><span>PDF</span><span>EPS</span><span>DOCX</span><span>PPTX</span><span>LaTeX</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 16 -->
+    <section id="s16">
+      <div class="sec-head"><span class="sec-num">16</span><h2>Database structure</h2></div>
+      <p class="sec-sub">A PostgreSQL entity set, with a project as the root of every record.</p>
+      <div class="grid2">
+        <div>
+          <div class="panel-label">CORE ENTITIES</div>
+          <div class="panel">users               projects
+datasets            worksheets
+columns             data_transformations
+statistical_analyses
+analysis_parameters
+graphs              graph_series
+graph_axes          graph_annotations
+graph_templates     figures
+figure_panels       journal_presets
+exports             audit_logs
+versions</div>
+        </div>
+        <div>
+          <div class="panel-label">RELATIONSHIP</div>
+          <div class="panel">PROJECT
+  ├── DATASET
+  │     └── WORKSHEET
+  │           └── COLUMNS
+  │
+  ├── ANALYSIS
+  │     └── RESULTS
+  │
+  ├── GRAPH
+  │     ├── SERIES
+  │     ├── AXES
+  │     └── ANNOTATIONS
+  │
+  └── FIGURE
+        ├── PANEL A
+        ├── PANEL B
+        ├── PANEL C
+        └── PANEL D</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 17 -->
+    <section id="s17">
+      <div class="sec-head"><span class="sec-num">17</span><h2>What differentiates SCIX</h2></div>
+      <p class="sec-sub">Three pillars, the third of which moves SCIX beyond a graphing tool.</p>
+      <div class="pillars">
+        <div class="pillar">
+          <div class="mark">①</div>
+          <h4>Origin-style plotting</h4>
+          <p>A powerful data → analysis → graph workflow for demanding scientific plots.</p>
+        </div>
+        <div class="pillar">
+          <div class="mark">②</div>
+          <h4>Prism-style statistics</h4>
+          <p>Statistics → visualization → significance → publication, in one continuous path.</p>
+        </div>
+        <div class="pillar">
+          <div class="mark">③</div>
+          <h4>Research integrity</h4>
+          <p>Data → analysis → figure → manuscript, as a reproducible research record.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 18 -->
+    <section id="s18">
+      <div class="sec-head"><span class="sec-num">18</span><h2>Final product architecture &amp; roadmap</h2></div>
+      <p class="sec-sub">Plot Studio sits between the Writing and Literature modules, feeding a shared Research Integrity layer and Export Center.</p>
+
+      <div class="panel">                           SCIX
+              SCIENTIFIC RESEARCH PLATFORM
+                              │
+ ┌────────────────────────────┼────────────────────────────┐
+ │                            │                            │
+WRITING                    PLOT STUDIO                 LITERATURE
+ Human writing              Data workspace              References
+ Grammar                    Statistics                  DOI
+ Sentence structure         Regression / Graphing        PDF · Evidence Matrix
+ │                            │                            │
+ └──────────────┬─────────────┴─────────────┬──────────────┘
+                │                           │
+             RESEARCH                   JOURNAL
+             INTEGRITY                 PREPARATION
+        Audit trail                Formatting
+        Reproducibility            Figure rules
+        Version control            References
+        Data traceability         Submission
+                │                           │
+                └─────────────┬─────────────┘
+                              │
+                         EXPORT CENTER
+                    DOCX · PDF · LaTeX · PPTX</div>
+
+      <h3 style="margin-top:40px;">Recommended development priority</h3>
+      <div class="releases">
+        <div class="release">
+          <div class="rel-num">RELEASE 1 — CORE</div>
+          <h4>Foundation</h4>
+          <p>Data table, import, basic graphs, formatting, PNG/PDF export.</p>
+        </div>
+        <div class="release">
+          <div class="rel-num">RELEASE 2 — SCIENTIFIC</div>
+          <h4>Analytical depth</h4>
+          <p>Regression, error bars, curve fitting, statistics, publication-quality export.</p>
+        </div>
+        <div class="release">
+          <div class="rel-num">RELEASE 3 — PRISM-STYLE</div>
+          <h4>Statistical workflow</h4>
+          <p>ANOVA, t-tests, multiple comparisons, dose-response, survival, ROC.</p>
+        </div>
+        <div class="release">
+          <div class="rel-num">RELEASE 4 — ORIGIN-STYLE</div>
+          <h4>Advanced plotting</h4>
+          <p>Advanced fitting, peak analysis, layered graphs, batch plotting, templates.</p>
+        </div>
+        <div class="release">
+          <div class="rel-num">RELEASE 5 — RESEARCH INTELLIGENCE</div>
+          <h4>Integrity layer</h4>
+          <p>Figure audit, reproducibility, journal presets, manuscript integration, full audit trail.</p>
+        </div>
+      </div>
+
+      <p class="wide" style="margin-top:40px;font-size:16px;color:var(--ink-soft);max-width:70ch;">This sequence is meant to make SCIX Plot Studio a serious scientific visualization component rather than a charting feature, while holding to the central principle: the researcher owns the science; SCIX provides the professional tools to analyze, visualize, organize, and publish it.</p>
+    </section>
+
+  </main>
+</div>
+
+<footer>SCIX PLOT STUDIO — INTERNAL PRODUCT SPECIFICATION — PREPARED FOR SOFTWARE DEVELOPMENT PLANNING</footer>
+
+<script>
+  // lightweight scroll-spy for the TOC
+  const links = Array.from(document.querySelectorAll('.toc-list a'));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  const setActive = () => {
+    let idx = 0;
+    const pos = window.scrollY + 120;
+    sections.forEach((sec, i) => { if (sec && sec.offsetTop <= pos) idx = i; });
+    links.forEach(l => l.classList.remove('active'));
+    if (links[idx]) links[idx].classList.add('active');
+  };
+  document.addEventListener('scroll', setActive, { passive: true });
+  setActive();
+</script>
+
+</body>
+</html>

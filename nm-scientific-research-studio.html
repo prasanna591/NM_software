@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NM Scientific Research Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f4f0;
+    --paper-2:#ffffff;
+    --ink:#1c1c1a;
+    --ink-soft:#55534c;
+    --ink-faint:#8b887d;
+    --rule:#dcd9cf;
+    --human:#1f6f4a;      /* green — human-authored, from the doc's own 🟢 */
+    --human-tint:#e5f0e8;
+    --assist:#2a4f8f;     /* blue — software-assisted, from the doc's own 🔵 */
+    --assist-tint:#e6ecf8;
+    --mark:#a5321f;       /* manuscript-red — corrections / track changes */
+    --mark-tint:#f8e9e5;
+    --serif:"Newsreader", Georgia, serif;
+    --mono:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    font-size:18px;
+    line-height:1.6;
+  }
+  a{color:inherit;}
+  ::selection{background:var(--mark-tint);}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 56px;}
+  @media (max-width:860px){.wrap{padding:0 22px;}}
+
+  /* ---------------- top bar ---------------- */
+  .topbar{
+    position:sticky;top:0;z-index:40;
+    background:rgba(245,244,240,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--rule);
+  }
+  .topbar-inner{
+    max-width:1180px;margin:0 auto;padding:18px 56px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  @media (max-width:860px){.topbar-inner{padding:16px 22px;}}
+  .brand{font-family:var(--mono);font-size:13px;letter-spacing:.03em;font-weight:600;}
+  .brand span{color:var(--mark);}
+  .navlinks{display:flex;gap:26px;font-family:var(--mono);font-size:12.5px;color:var(--ink-soft);}
+  .navlinks a{text-decoration:none;}
+  .navlinks a:hover{color:var(--ink);}
+  @media (max-width:760px){.navlinks{display:none;}}
+
+  /* ---------------- hero ---------------- */
+  .hero{padding:104px 0 72px;border-bottom:1px solid var(--rule);}
+  .hero-eyebrow{
+    font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--mark);
+    margin-bottom:22px;
+  }
+  .hero h1{
+    font-size:clamp(38px,5.4vw,66px);
+    line-height:1.04;font-weight:600;margin:0 0 26px;max-width:16ch;
+  }
+  .hero h1 em{font-style:italic;font-weight:500;color:var(--ink-soft);}
+  .hero-dek{font-size:20px;color:var(--ink-soft);max-width:52ch;margin:0 0 44px;}
+
+  .diff-card{
+    background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
+    max-width:760px;overflow:hidden;
+    box-shadow:0 1px 0 rgba(0,0,0,0.02);
+  }
+  .diff-row{padding:22px 28px;}
+  .diff-row + .diff-row{border-top:1px solid var(--rule);}
+  .diff-label{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:10px;}
+  .diff-text{font-size:18px;line-height:1.65;}
+  .strike{color:var(--mark);text-decoration:line-through;text-decoration-thickness:1.5px;background:var(--mark-tint);padding:0 2px;border-radius:2px;}
+  .ins{color:var(--human);background:var(--human-tint);padding:0 2px;border-radius:2px;}
+  .diff-actions{display:flex;gap:10px;padding:16px 28px 22px;font-family:var(--mono);font-size:12px;}
+  .btn{padding:7px 14px;border-radius:3px;border:1px solid var(--rule);background:var(--paper);color:var(--ink-soft);}
+  .btn.primary{background:var(--human);border-color:var(--human);color:#fff;}
+
+  .hero-note{
+    margin-top:34px;font-size:15px;color:var(--ink-soft);max-width:56ch;
+    border-left:2px solid var(--mark);padding-left:16px;
+  }
+  .hero-note strong{color:var(--ink);}
+
+  /* ---------------- principle band ---------------- */
+  .principle{
+    padding:64px 0;border-bottom:1px solid var(--rule);
+    background:var(--paper-2);
+  }
+  .principle blockquote{
+    margin:0;font-size:clamp(24px,3vw,34px);line-height:1.35;font-weight:500;max-width:24ch;
+  }
+  .principle blockquote .a{color:var(--human);}
+  .principle blockquote .b{color:var(--assist);}
+  .principle cite{display:block;margin-top:22px;font-style:normal;font-family:var(--mono);font-size:12.5px;color:var(--ink-faint);}
+
+  /* ---------------- generic section ---------------- */
+  section{padding:80px 0;border-bottom:1px solid var(--rule);}
+  section:last-of-type{border-bottom:none;}
+  .sec-eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--ink-faint);margin-bottom:14px;}
+  h2{font-size:clamp(28px,3.4vw,40px);font-weight:600;margin:0 0 16px;max-width:20ch;}
+  .sec-dek{font-size:17px;color:var(--ink-soft);max-width:58ch;margin:0 0 44px;}
+
+  /* feature grid */
+  .fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--rule);border:1px solid var(--rule);}
+  @media (max-width:900px){.fgrid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:600px){.fgrid{grid-template-columns:1fr;}}
+  .fcard{background:var(--paper-2);padding:26px 24px;}
+  .fcard h4{font-size:17px;margin:0 0 8px;font-weight:600;}
+  .fcard p{margin:0;font-size:14px;color:var(--ink-soft);line-height:1.55;}
+  .fcard .tag{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);letter-spacing:.03em;margin-bottom:10px;display:block;}
+
+  /* consistency examples */
+  .pairs{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px;}
+  @media (max-width:700px){.pairs{grid-template-columns:1fr;}}
+  .pair{
+    background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
+    padding:16px 20px;display:flex;align-items:center;justify-content:space-between;
+    font-family:var(--mono);font-size:14px;
+  }
+  .pair .bad{color:var(--mark);text-decoration:line-through;}
+  .pair .good{color:var(--human);}
+  .pair .arrow{color:var(--ink-faint);margin:0 10px;}
+
+  /* checker columns */
+  .checker-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;}
+  @media (max-width:960px){.checker-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.checker-grid{grid-template-columns:1fr;}}
+  .checker-col h4{
+    font-family:var(--mono);font-size:12.5px;letter-spacing:.02em;color:var(--mark);
+    margin:0 0 14px;padding-bottom:10px;border-bottom:1px solid var(--rule);
+  }
+  .checker-col ul{list-style:none;margin:0;padding:0;font-size:14px;color:var(--ink-soft);}
+  .checker-col li{padding:4px 0;}
+  .checker-col li::before{content:"✓ ";color:var(--human);}
+
+  /* authorship engine */
+  .authorship{
+    background:var(--ink);color:var(--paper);border-radius:10px;
+    padding:48px 52px;
+  }
+  @media (max-width:700px){.authorship{padding:32px 26px;}}
+  .authorship-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px;}
+  .authorship-title{font-family:var(--mono);font-size:13px;letter-spacing:.06em;color:#c9c6ba;}
+  .authorship-toggle{
+    display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12.5px;color:#9fd8b4;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;background:#4fd88a;box-shadow:0 0 0 4px rgba(79,216,138,0.18);}
+  .auth-rows{display:grid;grid-template-columns:1fr 1fr;gap:10px 40px;}
+  @media (max-width:640px){.auth-rows{grid-template-columns:1fr;}}
+  .auth-row{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.1);
+    font-size:15px;
+  }
+  .auth-row .who{
+    font-family:var(--mono);font-size:11px;letter-spacing:.03em;padding:3px 9px;border-radius:20px;
+  }
+  .who.human{background:rgba(79,216,138,0.16);color:#8be5ac;}
+  .who.assist{background:rgba(122,166,255,0.16);color:#9db9ff;}
+
+  /* architecture / stack */
+  .stack-vis{display:flex;flex-direction:column;gap:12px;}
+  .stack-layer{
+    background:var(--paper-2);border:1px solid var(--rule);border-radius:6px;
+    padding:16px 22px;
+  }
+  .stack-layer .lname{font-weight:600;font-size:15px;margin-bottom:6px;}
+  .stack-layer .lparts{
+    display:flex;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:12px;color:var(--ink-soft);
+  }
+  .lparts span{background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:3px 8px;}
+  .stack-link{text-align:center;font-family:var(--mono);color:var(--ink-faint);font-size:13px;}
+
+  .api-panel{
+    background:#161513;color:#e9e6db;border-radius:6px;padding:22px 26px;
+    font-family:var(--mono);font-size:13px;line-height:2;overflow-x:auto;
+  }
+  .api-panel .verb{color:#8be5ac;margin-right:10px;}
+  .api-panel .path{color:#e9e6db;}
+  .api-panel .cmt{color:#7a7768;}
+
+  /* discipline chips */
+  .chips{display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{
+    font-family:var(--mono);font-size:13px;color:var(--ink-soft);
+    border:1px solid var(--rule);background:var(--paper-2);border-radius:20px;padding:7px 16px;
+  }
+
+  /* roadmap */
+  .roadmap{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:var(--rule);border:1px solid var(--rule);}
+  @media (max-width:900px){.roadmap{grid-template-columns:1fr 1fr;}}
+  @media (max-width:560px){.roadmap{grid-template-columns:1fr;}}
+  .rstage{background:var(--paper-2);padding:26px 22px;}
+  .rstage .rnum{font-family:var(--mono);font-size:11.5px;color:var(--mark);margin-bottom:10px;}
+  .rstage h4{margin:0 0 8px;font-size:17px;}
+  .rstage p{margin:0;font-size:13.5px;color:var(--ink-soft);}
+
+  /* closing */
+  .closing{padding:100px 0 120px;text-align:left;}
+  .closing h2{max-width:22ch;font-size:clamp(30px,4vw,46px);}
+  .closing .rules{
+    margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:6px 60px;
+    font-family:var(--mono);font-size:14px;
+  }
+  @media (max-width:640px){.closing .rules{grid-template-columns:1fr;}}
+  .rules .yes{color:var(--human);}
+  .rules .no{color:var(--mark);}
+  .rules div{padding:6px 0;border-bottom:1px solid var(--rule);}
+
+  footer{padding:36px 0 60px;font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">NM <span>SCIENTIFIC</span> RESEARCH STUDIO</div>
+    <div class="navlinks">
+      <a href="#writing">Writing</a>
+      <a href="#authorship">Authorship</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#disciplines">Disciplines</a>
+      <a href="#roadmap">Roadmap</a>
+    </div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">HUMAN-WRITTEN · SCIENTIFICALLY ORGANIZED · PUBLICATION READY</div>
+    <h1>Your research, <em>written correctly</em> — never rewritten for you</h1>
+    <p class="hero-dek">A scientific writing and research platform that improves grammar, structure, terminology and formatting — without inventing a single scientific claim.</p>
+
+    <div class="diff-card">
+      <div class="diff-row">
+        <div class="diff-label">ORIGINAL — WRITTEN BY THE RESEARCHER</div>
+        <div class="diff-text">The material is <span class="strike">showing</span> very high activity because it is <span class="strike">having</span> good surface area.</div>
+      </div>
+      <div class="diff-row">
+        <div class="diff-label">SUGGESTED REVISION — LANGUAGE ONLY</div>
+        <div class="diff-text">The material <span class="ins">exhibited</span> high activity, <span class="ins">which may be associated with its large surface area</span>.</div>
+      </div>
+      <div class="diff-actions">
+        <span class="btn primary">Accept</span>
+        <span class="btn">Edit</span>
+        <span class="btn">Reject</span>
+      </div>
+    </div>
+
+    <div class="hero-note"><strong>Core principle:</strong> the researcher provides the ideas, data, interpretation and scientific content. The software corrects language, structure, formatting and presentation without inventing scientific information.</div>
+  </div>
+</header>
+
+<div class="principle">
+  <div class="wrap">
+    <blockquote>Not an <span class="a">AI paper-writing service</span>. A <span class="b">scientific writing and publication</span> platform.</blockquote>
+    <cite>PRODUCT IDENTITY — NM SCIENTIFIC RESEARCH STUDIO</cite>
+  </div>
+</div>
+
+<section id="writing">
+  <div class="wrap">
+    <div class="sec-eyebrow">LANGUAGE &amp; WRITING MODULE</div>
+    <h2>Every layer of language, checked — none of the science, touched</h2>
+    <p class="sec-dek">From single-word grammar fixes to full-manuscript consistency, each tool acts only on how something is said, never on what it claims.</p>
+
+    <div class="fgrid">
+      <div class="fcard">
+        <span class="tag">01 · GRAMMAR</span>
+        <h4>Grammar correction</h4>
+        <p>Tense, subject–verb agreement, articles, prepositions, plurals, pronouns, punctuation, spelling, capitalization, fragments, run-ons.</p>
+      </div>
+      <div class="fcard">
+        <span class="tag">02 · SENTENCES</span>
+        <h4>Sentence formation</h4>
+        <p>Rough, non-native phrasing rebuilt into correct scientific English — the researcher approves every change.</p>
+      </div>
+      <div class="fcard">
+        <span class="tag">03 · REGISTER</span>
+        <h4>Scientific language improvement</h4>
+        <p>Academic English, concise or formal phrasing, active/passive voice, readability, redundancy, flow — as selectable options.</p>
+      </div>
+      <div class="fcard">
+        <span class="tag">04 · PARAGRAPH</span>
+        <h4>Paragraph-level checking</h4>
+        <p>Topic sentences, sequencing, repetition, transitions, coherence, sentence length, terminology consistency within a paragraph.</p>
+      </div>
+      <div class="fcard">
+        <span class="tag">05 · TERMINOLOGY</span>
+        <h4>Scientific terminology checker</h4>
+        <p>"nano particle" → nanoparticle, "bio sensor" → biosensor — plus units, formulas, gene/protein notation, math notation, per discipline.</p>
+      </div>
+      <div class="fcard">
+        <span class="tag">06 · CONSISTENCY</span>
+        <h4>Consistency checker</h4>
+        <p>Catches CeNiO₃ vs CeNiO3, UV-Vis vs UV–Vis, Fig. 1 vs Figure 1 — then applies one chosen style throughout.</p>
+      </div>
+    </div>
+
+    <h3 style="font-size:15px;font-family:var(--mono);color:var(--ink-soft);margin:48px 0 16px;">CONSISTENCY CHECKER — EXAMPLES</h3>
+    <div class="pairs">
+      <div class="pair"><span class="bad">CeNiO3</span><span class="arrow">→</span><span class="good">CeNiO₃</span></div>
+      <div class="pair"><span class="bad">UV-Vis</span><span class="arrow">→</span><span class="good">UV–Vis</span></div>
+      <div class="pair"><span class="bad">10mg</span><span class="arrow">→</span><span class="good">10 mg</span></div>
+      <div class="pair"><span class="bad">Fig. 1</span><span class="arrow">→</span><span class="good">Figure 1</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="checker">
+  <div class="wrap">
+    <div class="sec-eyebrow">PRE-SUBMISSION</div>
+    <h2>One manuscript checker, five dimensions</h2>
+    <p class="sec-dek">Run before submission — language, structure, references, figures and tables, all checked in the same pass.</p>
+    <div class="checker-grid">
+      <div class="checker-col">
+        <h4>LANGUAGE</h4>
+        <ul><li>Grammar</li><li>Spelling</li><li>Sentence formation</li><li>Academic style</li><li>Terminology</li></ul>
+      </div>
+      <div class="checker-col">
+        <h4>STRUCTURE</h4>
+        <ul><li>Heading hierarchy</li><li>Abstract</li><li>Keywords</li><li>Intro / Methods</li><li>Results / Discussion</li><li>Conclusion</li></ul>
+      </div>
+      <div class="checker-col">
+        <h4>REFERENCES</h4>
+        <ul><li>Missing citations</li><li>Duplicate references</li><li>Unused references</li><li>Citation numbering</li><li>Reference style</li></ul>
+      </div>
+      <div class="checker-col">
+        <h4>FIGURES</h4>
+        <ul><li>Figure numbering</li><li>Captions</li><li>In-text references</li><li>Resolution</li><li>Axis labels &amp; units</li></ul>
+      </div>
+      <div class="checker-col">
+        <h4>TABLES</h4>
+        <ul><li>Table numbering</li><li>Captions</li><li>Units</li><li>In-text references</li></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="authorship">
+  <div class="wrap">
+    <div class="sec-eyebrow">THE DIFFERENTIATOR</div>
+    <h2>A visible line between what the researcher wrote and what the software touched</h2>
+    <p class="sec-dek">Every change is labeled at the moment it happens — not disclosed after the fact. This is what separates a writing assistant from an AI humanizer.</p>
+
+    <div class="authorship">
+      <div class="authorship-top">
+        <div class="authorship-title">SCIX AUTHORSHIP POLICY</div>
+        <div class="authorship-toggle"><span class="dot"></span> HUMAN AUTHORSHIP MODE — ENABLED</div>
+      </div>
+      <div class="auth-rows">
+        <div class="auth-row"><span>Research content</span><span class="who human">HUMAN</span></div>
+        <div class="auth-row"><span>Research interpretation</span><span class="who human">HUMAN</span></div>
+        <div class="auth-row"><span>Experimental results</span><span class="who human">HUMAN</span></div>
+        <div class="auth-row"><span>Grammar correction</span><span class="who assist">SOFTWARE</span></div>
+        <div class="auth-row"><span>Spelling correction</span><span class="who assist">SOFTWARE</span></div>
+        <div class="auth-row"><span>Formatting</span><span class="who assist">SOFTWARE</span></div>
+        <div class="auth-row"><span>Statistical calculation</span><span class="who assist">SOFTWARE</span></div>
+        <div class="auth-row"><span>Figure generation from user data</span><span class="who assist">SOFTWARE</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="wrap">
+    <div class="sec-eyebrow">UNDER THE HOOD</div>
+    <h2>Built as a research platform, not a text box</h2>
+    <p class="sec-dek">A Next.js interface over a FastAPI backend, with a dedicated scientific computing engine and a PostgreSQL project model underneath.</p>
+
+    <div class="stack-vis">
+      <div class="stack-layer">
+        <div class="lname">Frontend — Next.js / React</div>
+        <div class="lparts"><span>Manuscript editor</span><span>Data manager</span><span>Graph &amp; Plot Studio</span><span>Dashboard</span></div>
+      </div>
+      <div class="stack-link">↕</div>
+      <div class="stack-layer">
+        <div class="lname">Backend — FastAPI</div>
+        <div class="lparts"><span>Writing Engine</span><span>Data Engine</span><span>Research Engine</span><span>Auth · Export</span></div>
+      </div>
+      <div class="stack-link">↓</div>
+      <div class="stack-layer">
+        <div class="lname">Scientific engine — Python</div>
+        <div class="lparts"><span>Pandas</span><span>NumPy</span><span>SciPy</span><span>Statsmodels</span><span>Matplotlib</span><span>Plotly</span><span>SymPy</span></div>
+      </div>
+      <div class="stack-link">↓</div>
+      <div class="stack-layer">
+        <div class="lname">PostgreSQL</div>
+        <div class="lparts"><span>users</span><span>projects</span><span>manuscripts → sections, revisions</span><span>datasets</span><span>analyses</span><span>figures</span><span>tables</span><span>references</span><span>journal_settings</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:15px;font-family:var(--mono);color:var(--ink-soft);margin:48px 0 16px;">CORE API SURFACE</h3>
+    <div class="api-panel">
+<span class="verb">POST</span><span class="path">/api/projects</span>            <span class="cmt">// create a research project</span>
+<span class="verb">GET</span> <span class="path">/api/projects</span>            <span class="cmt">// list a researcher's projects</span>
+<span class="verb">POST</span><span class="path">/api/manuscripts</span>         <span class="cmt">// start a manuscript</span>
+<span class="verb">POST</span><span class="path">/api/data/upload</span>         <span class="cmt">// attach a dataset</span>
+<span class="verb">POST</span><span class="path">/api/statistics/analyze</span> <span class="cmt">// run a chosen statistical test</span>
+<span class="verb">POST</span><span class="path">/api/graphs/create</span>       <span class="cmt">// generate a figure from data</span>
+<span class="verb">POST</span><span class="path">/api/references</span>         <span class="cmt">// manage citations</span>
+<span class="verb">POST</span><span class="path">/api/export/docx</span>        <span class="cmt">// export to DOCX / PDF / LaTeX</span>
+    </div>
+  </div>
+</section>
+
+<section id="disciplines">
+  <div class="wrap">
+    <div class="sec-eyebrow">ONE CORE, EVERY FIELD</div>
+    <h2>Not chemistry software. Not biology software.</h2>
+    <p class="sec-dek">Each discipline carries its own terminology, manuscript templates, statistical methods, and journal formats — on the same shared SCIX core.</p>
+    <div class="chips">
+      <span class="chip">Chemistry</span><span class="chip">Physics</span><span class="chip">Biology</span>
+      <span class="chip">Biotechnology</span><span class="chip">Medicine</span><span class="chip">Pharmacy</span>
+      <span class="chip">Agriculture</span><span class="chip">Engineering</span><span class="chip">Computer Science</span>
+      <span class="chip">AI / Data Science</span><span class="chip">Mathematics</span><span class="chip">Environmental Science</span>
+      <span class="chip">Psychology</span><span class="chip">Economics</span><span class="chip">Management</span>
+      <span class="chip">Education</span><span class="chip">Social Sciences</span><span class="chip">Humanities</span>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="wrap">
+    <div class="sec-eyebrow">HOW IT GETS BUILT</div>
+    <h2>Four stages — starting with a working MVP, not the whole platform</h2>
+    <div class="roadmap">
+      <div class="rstage">
+        <div class="rnum">STAGE 1 — MVP</div>
+        <h4>Prove the workflow</h4>
+        <p>Editor, projects, grammar &amp; sentence correction, data upload, basic graphs and tables.</p>
+      </div>
+      <div class="rstage">
+        <div class="rnum">STAGE 2 — RESEARCH PLATFORM</div>
+        <h4>Add depth</h4>
+        <p>Statistics, references, literature management, version control, collaboration.</p>
+      </div>
+      <div class="rstage">
+        <div class="rnum">STAGE 3 — PUBLICATION PLATFORM</div>
+        <h4>Get to submission</h4>
+        <p>Journal formatting, DOCX/PDF/LaTeX export, submission prep, research-integrity checks.</p>
+      </div>
+      <div class="rstage">
+        <div class="rnum">STAGE 4 — INSTITUTIONAL PLATFORM</div>
+        <h4>Scale to labs</h4>
+        <p>University accounts, research labs, supervisor dashboards, institutional repositories, admin.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="closing">
+  <div class="wrap">
+    <h2>A clear product identity, stated as rules</h2>
+    <div class="rules">
+      <div class="yes">Grammar correction → YES</div>
+      <div class="yes">Sentence formation → YES</div>
+      <div class="yes">Academic English improvement → YES</div>
+      <div class="yes">Scientific terminology correction → YES</div>
+      <div class="yes">Spelling → YES</div>
+      <div class="yes">Data analysis, graphs, statistics → YES</div>
+      <div class="yes">References &amp; formatting → YES</div>
+      <div class="yes">Journal preparation → YES</div>
+      <div class="no">AI-generated research claims → NO</div>
+      <div class="no">AI-generated experimental results → NO</div>
+      <div class="no">AI-generated references → NO</div>
+      <div class="no">Automatic scientific content generation → NO</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">NM SCIENTIFIC RESEARCH STUDIO — PRODUCT CONCEPT — HUMAN-CENTERED SCIENTIFIC WRITING</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,418 @@
+# SCIX discipline profile: Chemistry
+#
+# This file is DATA. Adding or amending a discipline must not require a code change
+# (docs/07 7.1). Everything the Chemistry workflow needs is declared here:
+#
+#   1. terminology          -- terminology_rules
+#   2. manuscript templates -- manuscript_templates
+#   3. statistical methods  -- statistical_methods
+#   4. journal formats      -- journal_requirements
+#
+# Plot capabilities are listed too, because S2 7.3 names Chemistry's plotting set
+# (UV-Vis, FTIR, XRD, Chromatography, Calibration curves, Kinetics).
+#
+# Nothing in this file asserts a scientific result. Rules here *detect* a notation or
+# wording problem and propose a canonical form; a researcher accepts, edits, or rejects
+# every suggestion (R6).
+
+schema_version: 1
+key: chemistry
+display_name: Chemistry
+description: >-
+  Analytical, physical and materials chemistry. Covers spectroscopy, chromatography,
+  kinetics, electrochemistry and calibration workflows.
+
+# --------------------------------------------------------------------------- #
+# 1. Terminology
+# --------------------------------------------------------------------------- #
+terminology_rules:
+  # --- closed compounds ------------------------------------------------------ #
+  # S1 L301 names these two directly.
+  - id: nano_particle_closed
+    kind: compound
+    description: "'nano particle' is one word."
+    pattern: '\bnano[\s‐-―-]particle\b'
+    replacement: nanoparticle
+    severity: warning
+    applies_to: [chemistry, physics, materials_science, engineering]
+
+  - id: bio_sensor_closed
+    kind: compound
+    description: "'bio sensor' is one word."
+    pattern: '\bbio[\s‐-―-]sensor\b'
+    replacement: biosensor
+    severity: warning
+    applies_to: [chemistry, biology, medicine]
+
+  - id: quantum_dot_hyphen
+    kind: compound
+    description: "'quantum dot' is two words; 'quantum-dot' as a modifier is hyphenated."
+    pattern: '\bquantum‐dot\b'
+    replacement: quantum-dot
+    severity: info
+    applies_to: [chemistry, physics, materials_science]
+
+  - id: graphene_oxide_hyphen
+    kind: compound
+    description: "'graphene oxide' is two words; hyphenate only as a modifier."
+    pattern: '\bgraphene‐oxides?\b'
+    replacement: graphene-oxide
+    severity: info
+    applies_to: [chemistry, materials_science]
+
+  # --- chemical formula typography ------------------------------------------ #
+  # The spec's own example: CeNiO3 -> CeNiO3 with a Unicode subscript 3.
+  # transform: formula_digits -- the shared core maps every matched ASCII digit, so the
+  # two-digit case (Ca10(PO4)2) is handled by the same rule as the one-digit case.
+  - id: formula_subscripts
+    kind: formula_subscript
+    transform: formula_digits
+    description: "Element counts in a formula take Unicode subscripts."
+    pattern: '\b(?:Na|Fe|Ce|Ni|O|C|H|N|S|Cu|Zn|Ti|Ag|Au|Pt|Al|Si|Mn|Co|Cr|Mo|W|V|B|Li|Ca|Mg|Ba|Sr|K|P|I|He|Ne|Ar)\d+(?:\.\d+)?\b'
+    severity: info
+    applies_to: [chemistry, materials_science]
+
+  - id: formula_charge_superscripts
+    kind: formula_superscript
+    transform: formula_digits
+    description: "Ion charges take Unicode superscripts (SO4^2-)."
+    pattern: '(?<=[A-Za-z₀-₉)])(?:\^|\s)?[+-]{1,3}(?=\s|$|[,.;)])'
+    severity: info
+    applies_to: [chemistry]
+
+  - id: acid_formula_spacing
+    kind: compound
+    description: "Acid formulas are written without a space before the H."
+    pattern: '\b(H\s?2\s?SO\s?4|H\s?Cl|H\s?NO\s?3|H\s?3\s?PO\s?4|C\s?H\s?3\s?COOH|H\s?2\s?O\s?2|NaOH|KOH|C\s?2\s?H\s?5\s?OH)\b'
+    replacement: '\1'
+    severity: info
+    applies_to: [chemistry]
+
+  # --- typography the manuscript checker shares ----------------------------- #
+  - id: dash_style_hyphenated_technique
+    kind: dash_style
+    description: "Use an en dash in compound technique names (UV–Vis, FT–IR)."
+    pattern: '\b(UV|FT|IR|XRD|SEM|TGA|DSC|NMR|GPC|GC|HPLC|LC)[\s-](Vis|IR|MS)\b'
+    replacement: '\1–\2'
+    severity: warning
+    applies_to: [chemistry, materials_science, biology, medicine]
+
+  - id: number_unit_spacing
+    kind: number_unit_spacing
+    description: "A space between a number and its unit."
+    pattern: '\b(\d+(?:\.\d+)?)(mg|mL|ml|L|g|ng|µg|ug|mol|mmol|nm|µm|um|mm|cm|m|ppm|K|°C|min|s|h|V|mA|mV|Hz|kHz|MHz|GPa|MPa|kPa|Pa|W|mW|W/g|W/cm2|J/mol|wt%|vol%)(?![a-zA-Z₂₃])'
+    replacement: '\1 \2'
+    severity: warning
+    applies_to: [universal]
+
+  - id: temperature_degree_sign
+    kind: unit
+    description: "A degree sign has no space before it and no space before C."
+    pattern: '\b\s*°\s*C'
+    replacement: ' °C'
+    severity: warning
+    applies_to: [universal]
+
+  - id: figure_reference_form
+    kind: figure_reference
+    description: "Cite figures as 'Figure 1', not 'Fig. 1'."
+    pattern: '\b(Fig\.?|FIG\.?)\s*(\d+)'
+    replacement: 'Figure \2'
+    severity: info
+    applies_to: [universal]
+
+  - id: table_reference_form
+    kind: table_reference
+    description: "Cite tables as 'Table 1', not 'Tab. 1'."
+    pattern: '\b(Tab\.?|TAB\.?)\s*(\d+)'
+    replacement: 'Table \2'
+    severity: info
+    applies_to: [universal]
+
+  # --- locale ---------------------------------------------------------------- #
+  # Spelling variants are listed explicitly rather than as a '-isation' regex. A
+  # back-reference cannot delete the 's' in 'catalysation', so a suffix rule would
+  # produce 'catalyeise'-style nonsense.
+  - id: spelling_catalysed
+    kind: spelling_locale
+    description: "'catalysed', per US spelling."
+    pattern: '\bcatalysed\b'
+    replacement: catalyzed
+    severity: info
+    applies_to: [chemistry, physics, materials_science, engineering]
+
+  - id: spelling_sulphur
+    kind: spelling_locale
+    description: "'sulfur', per US spelling."
+    pattern: '\bsulphur\b'
+    replacement: sulfur
+    severity: info
+    applies_to: [chemistry, physics, materials_science, engineering]
+
+  - id: spelling_aluminium
+    kind: spelling_locale
+    description: "'aluminum', per US spelling."
+    pattern: '\baluminium\b'
+    replacement: aluminum
+    severity: info
+    applies_to: [chemistry, physics, materials_science]
+
+  # --- reagent naming -------------------------------------------------------- #
+  - id: concentration_spacing
+    kind: number_unit_spacing
+    description: "Concentrations read '5 mM', not '5mM'."
+    pattern: '\b(\d+(?:\.\d+)?)(mM|µM|uM|nM|M|mol\s?L-1|mol/L)\b'
+    replacement: '\1 \2'
+    severity: warning
+    applies_to: [chemistry, biology, medicine, pharmacy]
+
+  - id: percent_sign_spacing
+    kind: number_unit_spacing
+    description: "A space before '%' but not between the digits."
+    pattern: '\b(\d+(?:\.\d+)?)%'
+    replacement: '\1 %'
+    severity: info
+    applies_to: [universal]
+
+# --------------------------------------------------------------------------- #
+# 2. Manuscript templates
+# --------------------------------------------------------------------------- #
+manuscript_templates:
+  - key: experimental_report
+    name: Experimental Report
+    description: Standard IMRaD-with-instrumentation structure for a bench study.
+    sections:
+      - key: abstract
+        title: Abstract
+        required: true
+        max_words: 250
+      - key: introduction
+        title: Introduction
+        required: true
+        guidance: >-
+          Establish the problem and the gap. Citations live here; the reference manager
+          owns the bibliography itself.
+        min_words: 300
+      - key: results
+        title: Results
+        required: true
+        requires_figures: true
+        guidance: >-
+          Every numeric claim must be traceable to a figure or a saved analysis. The
+          writing module blocks an unsourced statistic here.
+      - key: discussion
+        title: Discussion
+        required: true
+        guidance: >-
+          Interpretation is researcher-authored. The system never writes a conclusion.
+      - key: experimental_section
+        title: Experimental Section
+        required: true
+        guidance: >-
+          Reagents, instrument models, acquisition parameters, sample preparation. Full
+          reproducibility requires a reader to repeat the work from this section alone.
+      - key: references
+        title: References
+        required: true
+        requires_references: true
+
+  - key: analytical_method
+    name: Analytical Method Validation
+    description: ICH Q2-style validation report for a quantitative method.
+    sections:
+      - key: abstract
+        title: Abstract
+        required: true
+        max_words: 250
+      - key: introduction
+        title: Introduction
+        required: true
+      - key: method_development
+        title: Method Development
+        required: true
+        requires_figures: true
+      - key: validation
+        title: Validation
+        required: true
+        requires_figures: true
+        guidance: >-
+          Specificity, linearity, range, accuracy, precision, detection limit,
+          quantitation limit. Each parameter maps to a saved analysis.
+      - key: results
+        title: Results
+        required: true
+        requires_figures: true
+      - key: discussion
+        title: Discussion
+        required: true
+      - key: references
+        title: References
+        required: true
+        requires_references: true
+
+# --------------------------------------------------------------------------- #
+# 3. Statistical methods
+# --------------------------------------------------------------------------- #
+# These are DEFAULTS offered by the wizard, not restrictions. A researcher may run
+# anything in the registry against Chemistry data; nothing here is enforced.
+# docs/07 7.4: calibration, kinetics and dose-response are the chemistry-specific
+# statistics; Tukey follows ANOVA as the named pairing.
+statistical_methods:
+  - test: descriptive_statistics
+    label: Descriptive statistics
+    default_alpha: 0.05
+    guidance: n, mean, SD, median, IQR per condition. Reported automatically, not inferred.
+
+  - test: one_way_anova
+    label: One-way ANOVA
+    default_alpha: 0.05
+    post_hoc: tukey
+    assumptions:
+      - Independent samples per group.
+      - Approximately normal residuals within each group.
+      - Homogeneous variances; check with Levene's test before interpreting.
+    guidance: >-
+      The omnibus test only says at least one group differs. Pairwise claims require the
+      post-hoc comparison, which the wizard offers once this test is significant.
+
+  - test: tukey
+    label: Tukey HSD
+    default_alpha: 0.05
+    guidance: Family-wise error-controlled pairwise comparison following a significant ANOVA.
+
+  # NOTE: docs/07 7.4 lists "Calibration | Chemistry" in the capability table, but the
+  # 21-test registry (S2 3.7) contains no calibration *test*. Calibration is a graph type
+  # (see plot_capabilities below); the statistics behind it are a regression fit. Listed
+  # as linear_regression rather than inventing a test name the enum does not have.
+  - test: linear_regression
+    label: Calibration curve (linear fit)
+    default_alpha: 0.05
+    assumptions:
+      - Independently prepared standards spanning the range.
+      - Response linear over the fitted range.
+    guidance: >-
+      Fit, residuals, R^2, and the working range. The working range is what makes a
+      reported result reproducible. For a non-linear response use curve_fit below.
+
+  - test: curve_fit
+    label: Curve fitting (9 model families)
+    default_alpha: 0.05
+    guidance: >-
+      Linear, polynomial, exponential, Gaussian, Lorentzian, Hill, logistic, Michaelis-
+      Menten, Arrhenius. Record the model family and the starting parameters -- a fit
+      without them cannot be repeated.
+
+  - test: nonlinear_regression
+    label: Nonlinear regression
+    default_alpha: 0.05
+    guidance: Custom model with researcher-supplied form. The model string is part of the provenance record.
+
+  - test: time_series
+    label: Time series / kinetics
+    default_alpha: 0.05
+    guidance: >-
+      Kinetic traces are time-dependent measurements. Rate constants derived here are
+      reported with the fitting model and the time axis.
+
+  - test: t_test
+    label: Two-sample t-test
+    default_alpha: 0.05
+    guidance: Welch's default; state whether variances were assumed equal.
+
+  - test: paired_t_test
+    label: Paired t-test
+    default_alpha: 0.05
+    guidance: For repeated measurements on the same specimen (before/after treatment).
+
+# --------------------------------------------------------------------------- #
+# Plot capabilities (S2 7.3, Chemistry row)
+# --------------------------------------------------------------------------- #
+plot_capabilities:
+  - graph_type: spectrum
+    label: Spectrum / Spectra
+    rationale: UV-Vis, FTIR, Raman, PL emission.
+    default: true
+  - graph_type: calibration
+    label: Calibration curve
+    rationale: External-standard quantitation; response versus concentration.
+  - graph_type: kinetic
+    label: Kinetic trace
+    rationale: Concentration or signal versus time.
+  - graph_type: xy
+    label: XY scatter
+    rationale: General paired measurement.
+  - graph_type: line
+    label: Line
+    rationale: Repeated measurement across an ordered axis.
+  - graph_type: column
+    label: Column
+    rationale: Condition-level comparison.
+  - graph_type: box
+    label: Box plot
+    rationale: Replicate spread, with the raw points overlaid.
+  - graph_type: heatmap
+    label: Heatmap
+    rationale: Condition-by-time response surfaces.
+
+# --------------------------------------------------------------------------- #
+# 4. Journal formats
+# --------------------------------------------------------------------------- #
+# S2 3.10: every journal requirement carries its source and verification date, so the UI
+# can show a researcher where a rule came from and flag it as stale. These are seeded
+# defaults; an institution edits them, and editing changes the verification date.
+journal_requirements:
+  - journal_name: The Journal of Physical Chemistry C
+    publisher: American Chemical Society
+    rule_source: https://pubs.acs.org/journal/jpccau/about/author-guidelines
+    rule_verified_at: '2026-01-15'
+    width_mm: 89.0
+    height_mm: 66.0
+    resolution_dpi: 600
+    file_format: PDF
+    font_family: Times New Roman
+    min_font_pt: 7.0
+    max_panels: 4
+    citation_style: ACS
+    notes: >-
+      Single-column figures up to 89 mm; multi-panel beyond that. Font must remain
+      legible after reduction to final size.
+
+  - journal_name: Analytical Chemistry
+    publisher: American Chemical Society
+    rule_source: https://pubs.acs.org/journal/ancham/about/author-guidelines
+    rule_verified_at: '2026-01-15'
+    width_mm: 89.0
+    height_mm: 66.0
+    resolution_dpi: 600
+    file_format: PDF
+    font_family: Times New Roman
+    min_font_pt: 7.0
+    max_panels: 4
+    citation_style: ACS
+
+  - journal_name: Journal of Chromatography A
+    publisher: Elsevier
+    rule_source: https://www.sciencedirect.com/journal/journal-of-chromatography-a/publish/guide-for-authors
+    rule_verified_at: '2025-11-02'
+    width_mm: 84.0
+    height_mm: 60.0
+    resolution_dpi: 600
+    file_format: PDF-EPS
+    font_family: Arial
+    min_font_pt: 7.0
+    max_panels: 6
+    citation_style: Elsevier Harvard
+    stale_after_days: 365
+
+# --------------------------------------------------------------------------- #
+# Style defaults the researcher may change (docs/07 7.7)
+# --------------------------------------------------------------------------- #
+style_defaults:
+  figure_reference_form: Figure
+  table_reference_form: Table
+  dash_style: en-dash
+  spelling_locale: US
+  formula_notation: unicode_subscripts
+  citation_style: ACS
+  voice_preference: prefer_active
+  register: academic

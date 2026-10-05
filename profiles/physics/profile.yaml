@@ -1,0 +1,201 @@
+# SCIX discipline profile: Physics
+#
+# Second profile, and the proof that the discipline model is data rather than code.
+# This file was added after Chemistry with no change to any Python file, no new enum
+# value, and no migration. That is the claim docs/07 7.1 makes.
+#
+# It differs from Chemistry in exactly the four places the source says disciplines
+# differ: terminology, manuscript templates, statistical methods, journal formats.
+
+schema_version: 1
+key: physics
+display_name: Physics
+description: >-
+  Experimental and theoretical physics: spectroscopy, transport, magnetometry,
+  spectroscopy, and condensed matter characterisation.
+
+# --------------------------------------------------------------------------- #
+# 1. Terminology
+# --------------------------------------------------------------------------- #
+# Note what is NOT here: no chemical-formula rules. The closed-compound and figure/
+# table-reference rules are absent because the shared core already provides them as
+# `universal`, so repeating them here would be duplication, not coverage.
+terminology_rules:
+  - id: black_body_closed
+    kind: compound
+    description: "'black body' is hyphenated as a compound modifier."
+    pattern: '\bblack[\s‐-―-]body\b'
+    replacement: black-body
+    severity: info
+    applies_to: [physics, chemistry, materials_science]
+
+  - id: band_gap_closed
+    kind: compound
+    description: "'band gap' is two words; hyphenate only as a modifier."
+    pattern: '\bband‐gap\b'
+    replacement: band-gap
+    severity: info
+    applies_to: [physics, materials_science, chemistry]
+
+  - id: fermi_level_closed
+    kind: compound
+    description: "'Fermi level' is two words."
+    pattern: '\bFermi[\s‐-―-]level\b'
+    replacement: Fermi level
+    severity: info
+    applies_to: [physics, chemistry, materials_science]
+
+  - id: hall_effect_closed
+    kind: compound
+    description: "'Hall effect' is two words; hyphenate as a modifier."
+    pattern: '\bHall[\s‐-―-]effect\b'
+    replacement: Hall effect
+    severity: info
+    applies_to: [physics, materials_science]
+
+  # Physics needs no formula-digit rule beyond what Chemistry declares universal-safe;
+  # there is none here, deliberately.
+
+  - id: temperature_degree_sign_physics
+    kind: unit
+    description: "A degree sign has no space before it and no space before K or C."
+    pattern: '\b\s*°\s*(K|C)\b'
+    replacement: ' °\1'
+    severity: warning
+    applies_to: [physics, chemistry, materials_science, engineering]
+
+  - id: planck_constant_case
+    kind: math
+    description: "Apostrophe form of Planck's constant."
+    pattern: '\bPlanck’s?\s+constant\b'
+    replacement: "Planck's constant"
+    severity: info
+    applies_to: [physics, chemistry, materials_science]
+
+# --------------------------------------------------------------------------- #
+# 2. Manuscript templates
+# --------------------------------------------------------------------------- #
+manuscript_templates:
+  - key: experimental_physics_report
+    name: Experimental Physics Report
+    description: Standard structure for a laboratory measurement report.
+    sections:
+      - key: abstract
+        title: Abstract
+        required: true
+        max_words: 250
+      - key: introduction
+        title: Introduction
+        required: true
+        min_words: 300
+      - key: apparatus
+        title: Apparatus
+        required: true
+        guidance: >-
+          Instrument models, sample geometry, environmental conditions, calibration
+          procedure. A measurement report is only reproducible if the apparatus section
+          is complete.
+        requires_figures: true
+      - key: results
+        title: Results
+        required: true
+        requires_figures: true
+      - key: discussion
+        title: Discussion
+        required: true
+      - key: references
+        title: References
+        required: true
+        requires_references: true
+
+# --------------------------------------------------------------------------- #
+# 3. Statistical methods
+# --------------------------------------------------------------------------- #
+statistical_methods:
+  - test: descriptive_statistics
+    label: Descriptive statistics
+    default_alpha: 0.05
+
+  - test: linear_regression
+    label: Linear regression
+    default_alpha: 0.05
+    guidance: Physics fits are frequently weighted; record the weighting in the inputs.
+
+  - test: curve_fit
+    label: Curve fitting (9 model families)
+    default_alpha: 0.05
+    guidance: Record the model family and starting parameters; a fit without them is not repeatable.
+
+  - test: nonlinear_regression
+    label: Nonlinear regression
+    default_alpha: 0.05
+
+  - test: time_series
+    label: Time series
+    default_alpha: 0.05
+
+  - test: pearson
+    label: Pearson correlation
+    default_alpha: 0.05
+
+# --------------------------------------------------------------------------- #
+# Plot capabilities
+# --------------------------------------------------------------------------- #
+plot_capabilities:
+  - graph_type: xy
+    label: XY scatter
+    default: true
+  - graph_type: line
+    label: Line
+  - graph_type: spectrum
+    label: Spectrum
+  - graph_type: column
+    label: Column
+  - graph_type: box
+    label: Box plot
+  - graph_type: heatmap
+    label: Heatmap
+  - graph_type: contour
+    label: Contour
+    rationale: Iso-surfaces; engineering and materials also name this type.
+
+# --------------------------------------------------------------------------- #
+# 4. Journal formats
+# --------------------------------------------------------------------------- #
+journal_requirements:
+  - journal_name: Physical Review B
+    publisher: American Physical Society
+    rule_source: https://journals.aps.org/prb/authors
+    rule_verified_at: '2026-02-01'
+    width_mm: 88.0
+    height_mm: 66.0
+    resolution_dpi: 600
+    file_format: EPS-PDF
+    font_family: Times New Roman
+    min_font_pt: 8.0
+    max_panels: 4
+    citation_style: APS
+
+  - journal_name: Review of Modern Physics
+    publisher: American Physical Society
+    rule_source: https://journals.aps.org/rmp/authors
+    rule_verified_at: '2026-02-01'
+    width_mm: 88.0
+    height_mm: 120.0
+    resolution_dpi: 600
+    file_format: EPS-PDF
+    font_family: Times New Roman
+    min_font_pt: 8.0
+    max_panels: 6
+    citation_style: APS
+
+# --------------------------------------------------------------------------- #
+style_defaults:
+  figure_reference_form: Figure
+  table_reference_form: Table
+  dash_style: en-dash
+  spelling_locale: US
+  formula_notation: unicode_subscripts
+  citation_style: APS
+  voice_preference: prefer_active
+  register: academic
